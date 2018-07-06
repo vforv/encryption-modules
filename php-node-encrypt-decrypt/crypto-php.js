@@ -1,10 +1,22 @@
-const crypto = require('crypto');
+var crypto = require('crypto');
 
-const data = "data to encrypt";
-const key = "315a5504d921f8327f73a356d2bbcbf1";
-const iv = new Buffer(data.substring(0, 32), 'hex');
+var encrypt = function (plain_text, encryptionMethod, secret, iv) {
+    var encryptor = crypto.createCipheriv(encryptionMethod, secret, iv);
+    return encryptor.update(plain_text, 'utf8', 'base64') + encryptor.final('base64');
+};
 
-const cipher = crypto.createCipher('aes-256-cbc', key, iv);
-let crypted = cipher.update(data, 'utf8', 'hex')
-crypted += cipher.final('hex');
-console.log(crypted);
+var decrypt = function (encryptedMessage, encryptionMethod, secret, iv) {
+    var decryptor = crypto.createDecipheriv(encryptionMethod, secret, iv);
+    return decryptor.update(encryptedMessage, 'base64', 'utf8') + decryptor.final('utf8');
+};
+
+var textToEncrypt = new Date().toISOString().substr(0,19) + '|My super secret information.';
+var encryptionMethod = 'AES-256-CBC';
+var secret = "My32charPasswordAndInitVectorStr"; //must be 32 char length
+var iv = secret.substr(0,16);
+
+var encryptedMessage = encrypt(textToEncrypt, encryptionMethod, secret, iv);
+var decryptedMessage = decrypt(encryptedMessage, encryptionMethod, secret, iv);
+
+console.log(encryptedMessage);
+console.log(decryptedMessage);
